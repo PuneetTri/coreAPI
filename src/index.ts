@@ -5,8 +5,11 @@ import cors from "cors";
 import mongoose from "mongoose";
 
 // Controllers
-import { createAPI } from "./controllers/apiController";
-import { createRoute } from "./controllers/routeController";
+import { createAPI } from "./controllers/api.controller";
+import { createRoute } from "./controllers/route.controller";
+
+// Middleware
+import dynamicRouter from "./middleware/dynamicRouter.middleware";
 
 // Setup config
 dotenv.config();
@@ -28,9 +31,8 @@ mongoose
 app.post("/new/api", createAPI);
 app.post("/new/route", createRoute);
 
-// Central router
-import routes from "./routes";
-app.use("/api", routes);
+// Dynamically capture all the api requests made on /api
+app.use("/api", dynamicRouter);
 
 // Start the server
 app.listen(port, () => {

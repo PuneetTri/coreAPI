@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { createResponse } from "../utils/responseHelpers";
-import API from "../models/apiSchema";
-import Route from "../models/routeSchema";
-import path from "path";
-import generateCode from "../utils/generateCode";
-import fs from "fs";
+import API from "../models/apiSchema.model";
+import Route from "../models/routeSchem.model";
 
 const createRoute = async (req: Request, res: Response) => {
   const { apiId, method, endpoint, code, description } = req.body;
@@ -43,18 +40,21 @@ const createRoute = async (req: Request, res: Response) => {
       description,
     });
 
+    // Check if an route already exists with the same endpoint and method
+    const routeExists = await Route.findOne({ endpoint, method });
+
+    if (routeExists) {
+      return res.status(400).json(
+        createResponse({
+          success: false,
+          status: 400,
+          message: "A route already exists with the given endpoint and method.",
+        })
+      );
+    }
+
     // Save the Route to the database
     const savedRoute = await newRoute.save();
-
-    // Update the API route file
-    const filePath = path.join(__dirname, "..", "routes", "api", `${apiId}.ts`);
-
-    const routes = await Route.find({ apiId });
-
-    // Generate the code
-    const content = generateCode(routes);
-
-    fs.writeFileSync(filePath, content);
 
     return res.status(201).json(
       createResponse({
