@@ -39,15 +39,17 @@ router.use(async (req, res, next) => {
 
     // Execute the stored code
     if (route.code) {
-      // Handle the executeCode function
       try {
         await executeCode(req, res, route.code);
-      } catch (error) {
-        createResponse({
-          success: false,
-          status: 408,
-          message: "It took too long for your request to execute.",
-        });
+      } catch (error: any) {
+        // Handle code execution errors
+        return res.status(500).json(
+          createResponse({
+            success: false,
+            status: 500,
+            message: "An error occurred while executing the code.",
+          })
+        );
       }
     } else {
       return res.status(500).json(
@@ -58,7 +60,7 @@ router.use(async (req, res, next) => {
         })
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json(
       createResponse({
         success: false,
